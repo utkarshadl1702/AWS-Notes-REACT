@@ -4,9 +4,8 @@
     "apiName": "notesappreact",
     "serviceName": "AppSync",
     "defaultAuthType": {
-      "mode": "AWS_IAM"
-    },
-    "conflictResolution": {},
-    "additionalAuthTypes": []
+      "mode": "API_KEY",
+      "expirationTime": 7
+    }
   }
 }

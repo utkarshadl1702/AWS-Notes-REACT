@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import "./App.css";
+// import { Storage } from "@aws-amplify/storage"
 import "@aws-amplify/ui-react/styles.css";
 import {
   Button,
@@ -51,9 +53,7 @@ const App = ({ signOut }) => {
       description: form.get("description"),// Check if image exists before accessing its name
     };
     try {
-      // if (image) {
-      //   await Storage.put(data.name, image);
-      // }
+      await Storage.put(data);
   
       await API.graphql({
         query: createNoteMutation,

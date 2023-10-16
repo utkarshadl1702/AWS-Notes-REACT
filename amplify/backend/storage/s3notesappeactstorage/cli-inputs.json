@@ -1,0 +1,16 @@
+{
+  "resourceName": "s3notesappeactstorage",
+  "bucketName": "notesappeact-storage",
+  "policyUUID": "359c5cb9",
+  "storageAccess": "authAndGuest",
+  "guestAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ]
+}

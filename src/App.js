@@ -1,7 +1,8 @@
+// import AWS from "aws-sdk";
+
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
-import { Authenticator } from '@aws-amplify/ui-react';
 import {
   Button,
   Flex,
@@ -18,6 +19,17 @@ import {
   deleteNote as deleteNoteMutation,
 } from "./graphql/mutations";
 import { API, Storage } from "aws-amplify";
+var AWS = require('aws-sdk');
+AWS.config.update({
+  region: "us-east-1" //Here add you region
+});
+
+
+
+
+// module.exports = {
+//   devtool: '#eval-source-map',
+// };
 
 const App = ({ signOut }) => {
   const [notes, setNotes] = useState([]);
@@ -40,24 +52,36 @@ const App = ({ signOut }) => {
     );
     setNotes(notesFromAPI);
   }
+  
 
   async function createNote(event) {
-    event.preventDefault();
-    const form = new FormData(event.target);
-    const image = form.get("image");
-    const data = {
-      name: form.get("name"),
-      description: form.get("description"),
-      image: image.name,
-    };
-    if (!!data.image) await Storage.put(data.name, image);
-    await API.graphql({
-      query: createNoteMutation,
-      variables: { input: data },
-    });
-    fetchNotes();
-    event.target.reset();
+    try {
+      event.preventDefault();
+      const form = new FormData(event.target);
+      const image = form.get("image");
+      const data = {
+        name: form.get("name"),
+        description: form.get("description"),
+        image: image ? image.name : null,
+      };
+
+      if (image) {
+        await Storage.put(data.name, image);
+      }
+
+      const response = await API.graphql({
+        query: createNoteMutation,
+        variables: { input: data },
+      });
+
+      console.log("Mutation Response: ", response);
+      fetchNotes();
+      event.target.reset();
+    } catch (error) {
+      console.error("Error creating note:", error);
+    }
   }
+
 
   async function deleteNote({ id, name }) {
     const newNotes = notes.filter((note) => note.id !== id);
@@ -127,16 +151,13 @@ const App = ({ signOut }) => {
           </Flex>
         ))}
       </View>
-      <Authenticator>
-     {({ signOut, user }) => ( 
          <button onClick={signOut}>Sign out</button>
-       )}
-       </Authenticator>
     </View>
   );
 };
 
 export default withAuthenticator(App);
+
 
 
 

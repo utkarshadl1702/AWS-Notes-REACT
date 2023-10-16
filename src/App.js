@@ -1,5 +1,3 @@
-// import AWS from "aws-sdk";
-
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
@@ -11,7 +9,6 @@ import {
   TextField,
   View,
   withAuthenticator,
-  Image,
 } from "@aws-amplify/ui-react";
 import { listNotes } from "./graphql/queries";
 import {
@@ -19,17 +16,9 @@ import {
   deleteNote as deleteNoteMutation,
 } from "./graphql/mutations";
 import { API, Storage } from "aws-amplify";
-var AWS = require('aws-sdk');
-AWS.config.update({
-  region: "us-east-1" //Here add you region
+await API.configure({
+  aws_appsync_region: 'us-east-1'
 });
-
-
-
-
-// module.exports = {
-//   devtool: '#eval-source-map',
-// };
 
 const App = ({ signOut }) => {
   const [notes, setNotes] = useState([]);
@@ -52,36 +41,32 @@ const App = ({ signOut }) => {
     );
     setNotes(notesFromAPI);
   }
-  
 
   async function createNote(event) {
+    event.preventDefault();
+    const form = new FormData(event.target);
+   
+    const data = {
+      name: form.get("name"),
+      description: form.get("description"),// Check if image exists before accessing its name
+    };
     try {
-      event.preventDefault();
-      const form = new FormData(event.target);
-      const image = form.get("image");
-      const data = {
-        name: form.get("name"),
-        description: form.get("description"),
-        image: image ? image.name : null,
-      };
-
-      if (image) {
-        await Storage.put(data.name, image);
-      }
-
-      const response = await API.graphql({
+      // if (image) {
+      //   await Storage.put(data.name, image);
+      // }
+  
+      await API.graphql({
         query: createNoteMutation,
         variables: { input: data },
       });
-
-      console.log("Mutation Response: ", response);
+  
       fetchNotes();
       event.target.reset();
     } catch (error) {
       console.error("Error creating note:", error);
     }
   }
-
+  
 
   async function deleteNote({ id, name }) {
     const newNotes = notes.filter((note) => note.id !== id);
@@ -114,12 +99,6 @@ const App = ({ signOut }) => {
             variation="quiet"
             required
           />
-          <View
-            name="image"
-            as="input"
-            type="file"
-            style={{ alignSelf: "end" }}
-          />
           <Button type="submit" variation="primary">
             Create Note
           </Button>
@@ -137,21 +116,14 @@ const App = ({ signOut }) => {
             <Text as="strong" fontWeight={700}>
               {note.name}
             </Text>
-            <Text as="span">{note.description}</Text>
-            {note.image && (
-              <Image
-                src={note.image}
-                alt={`visual aid for ${note.name}`}
-                style={{ width: 400 }}
-              />
-            )}
+           
             <Button variation="link" onClick={() => deleteNote(note)}>
               Delete note
             </Button>
           </Flex>
         ))}
       </View>
-         <button onClick={signOut}>Sign out</button>
+      <Button onClick={signOut}>Sign Out</Button>
     </View>
   );
 };
@@ -195,3 +167,7 @@ export default withAuthenticator(App);
 // }
 
 // export default withAuthenticator(App);
+
+//iam credentials
+//access key: AKIAWYMZ6RHMZN3QFKX7
+//secret access key: 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
